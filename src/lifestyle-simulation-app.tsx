@@ -97,15 +97,36 @@ const calculateSocialImpact = (hours: number, quality: number) => {
 };
 
 // ============ COMPONENTS ============
+// Custom Tooltip for dark mode support
+const CustomTooltip = ({ active, payload, label, isDarkMode }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className={`p-3 rounded-lg border shadow-lg transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-gray-800 border-gray-600 text-white' 
+          : 'bg-white border-gray-200 text-gray-900'
+      }`}>
+        <p className="font-medium mb-1">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} style={{ color: entry.color }} className="text-sm">
+            {`${entry.name}: ${typeof entry.value === 'number' ? entry.value.toFixed(1) : entry.value}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 interface ProgressRingProps {
   score: number;
   label: string;
   color: string;
   icon?: any;
   size?: number;
+  isDarkMode?: boolean;
 }
 
-const ProgressRing = ({ score, label, color, icon: Icon, size = 120 }: ProgressRingProps) => {
+const ProgressRing = ({ score, label, color, icon: Icon, size = 120, isDarkMode = false }: ProgressRingProps) => {
   const radius = (size - 16) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
@@ -120,7 +141,7 @@ const ProgressRing = ({ score, label, color, icon: Icon, size = 120 }: ProgressR
           stroke="currentColor"
           strokeWidth="8"
           fill="none"
-          className="text-gray-200"
+          className="text-gray-200 dark:text-gray-700"
         />
         <circle
           cx={size/2}
@@ -137,8 +158,8 @@ const ProgressRing = ({ score, label, color, icon: Icon, size = 120 }: ProgressR
       </svg>
       <div className="absolute flex flex-col items-center">
         {Icon && <Icon className="w-5 h-5 mb-1" style={{ color }} />}
-        <span className="text-2xl font-bold">{Math.round(score)}</span>
-        <span className="text-xs text-gray-600">{label}</span>
+        <span className="text-2xl font-bold text-gray-900 dark:text-white">{Math.round(score)}</span>
+        <span className="text-xs text-gray-600 dark:text-gray-400">{label}</span>
       </div>
     </div>
   );
@@ -154,15 +175,16 @@ interface InputSliderProps {
   icon?: any;
   color: string;
   unit?: string;
+  isDarkMode?: boolean;
 }
 
-const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, color, unit = '' }: InputSliderProps) => {
+const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, color, unit = '', isDarkMode = false }: InputSliderProps) => {
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           {Icon && <Icon className="w-5 h-5" style={{ color }} />}
-          <label className="font-medium text-gray-700">{label}</label>
+          <label className="font-medium text-gray-700 dark:text-gray-300">{label}</label>
         </div>
         <span className="font-bold text-lg" style={{ color }}>
           {value}{unit}
@@ -177,12 +199,12 @@ const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, c
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="w-full h-2 rounded-lg appearance-none cursor-pointer"
         style={{
-          background: `linear-gradient(to right, ${color} 0%, ${color} ${((value - min) / (max - min)) * 100}%, #e5e7eb ${((value - min) / (max - min)) * 100}%, #e5e7eb 100%)`
+          background: `linear-gradient(to right, ${color} 0%, ${color} ${((value - min) / (max - min)) * 100}%, #6b7280 ${((value - min) / (max - min)) * 100}%, #6b7280 100%)`
         }}
       />
       <div className="flex justify-between mt-1">
-        <span className="text-xs text-gray-500">{min}{unit}</span>
-        <span className="text-xs text-gray-500">{max}{unit}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{min}{unit}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{max}{unit}</span>
       </div>
     </div>
   );
@@ -195,11 +217,12 @@ interface MetricCardProps {
   icon: any;
   color: string;
   trend?: number;
+  isDarkMode?: boolean;
 }
 
-const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend }: MetricCardProps) => {
+const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend, isDarkMode = false }: MetricCardProps) => {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
       <div className="flex items-start justify-between mb-4">
         <div className="p-2 rounded-lg" style={{ backgroundColor: `${color}20` }}>
           <Icon className="w-6 h-6" style={{ color }} />
@@ -210,9 +233,9 @@ const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend }: Metric
           </span>
         )}
       </div>
-      <h3 className="text-2xl font-bold mb-1">{value}</h3>
-      <p className="text-sm text-gray-600">{title}</p>
-      {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+      <h3 className="text-2xl font-bold mb-1 text-gray-900 dark:text-white">{value}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
+      {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
     </div>
   );
 };
@@ -220,13 +243,14 @@ const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend }: Metric
 interface StreakTrackerProps {
   streak: number;
   lastActive: string;
+  isDarkMode?: boolean;
 }
 
-const StreakTracker = ({ streak, lastActive }: StreakTrackerProps) => {
+const StreakTracker = ({ streak, lastActive, isDarkMode = false }: StreakTrackerProps) => {
   const isActiveToday = lastActive === new Date().toDateString();
   
   return (
-    <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 text-white">
+    <div className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 rounded-xl p-6 text-white">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <Flame className="w-8 h-8" />
@@ -241,7 +265,7 @@ const StreakTracker = ({ streak, lastActive }: StreakTrackerProps) => {
           <AlertCircle className="w-6 h-6 animate-pulse" />
         )}
       </div>
-      <div className="bg-white/20 rounded-lg p-3">
+      <div className="bg-white/20 dark:bg-black/20 rounded-lg p-3">
         <p className="text-sm font-medium">
           {streak === 0 ? "Start your journey today!" :
            streak < 7 ? "Building momentum! Keep going!" :
@@ -292,6 +316,7 @@ const App = () => {
   
   // UI states
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [streak] = useState(7);
   const [lastActive] = useState(new Date().toDateString());
   
@@ -439,9 +464,17 @@ const App = () => {
   ], [sleepImpact, exerciseImpact, nutritionImpact, deepWorkImpact, socialImpact]);
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark' 
+        : 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50'
+    }`}>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+      <header className={`backdrop-blur-sm border-b sticky top-0 z-10 transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-gray-800/90 border-gray-700' 
+          : 'bg-white/80 border-gray-200'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -452,10 +485,25 @@ const App = () => {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Life Optimizer
                 </h1>
-                <p className="text-xs text-gray-600">Transform your daily habits into life-changing results</p>
+                <p className={`text-xs transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>Transform your daily habits into life-changing results</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className={`p-2 rounded-lg transition-all duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Toggle dark mode"
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              
               {/* Preset Mode Buttons */}
               <div className="hidden md:flex gap-1 mr-4">
                 {['Balanced', 'Hard Charger', 'Gentle Reset'].map((mode) => (
@@ -465,7 +513,9 @@ const App = () => {
                     className={`px-3 py-1 text-sm rounded-md font-medium transition-all ${
                       presetMode === mode
                         ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : isDarkMode 
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     {mode}
@@ -479,7 +529,9 @@ const App = () => {
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                   activeTab === 'dashboard' 
                     ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    : isDarkMode
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 Dashboard
@@ -489,7 +541,9 @@ const App = () => {
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                   activeTab === 'inputs' 
                     ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    : isDarkMode
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 Daily Inputs
@@ -499,7 +553,9 @@ const App = () => {
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                   activeTab === 'projections' 
                     ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    : isDarkMode
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 Future You
@@ -516,20 +572,34 @@ const App = () => {
             {/* Profile and Current Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {/* Your Profile */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-gray-700' 
+                  : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center gap-2 mb-4">
-                  <User className="w-5 h-5 text-gray-600" />
-                  <h2 className="text-lg font-semibold text-gray-700">Your Profile</h2>
+                  <User className={`w-5 h-5 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`} />
+                  <h2 className={`text-lg font-semibold transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Your Profile</h2>
                 </div>
-                <p className="text-xs text-gray-500 mb-4">Personalize your baseline to improve accuracy.</p>
+                <p className={`text-xs mb-4 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>Personalize your baseline to improve accuracy.</p>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Sex</span>
+                    <span className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Sex</span>
                     <select 
                       value={profile.sex}
                       onChange={(e) => setProfile({...profile, sex: e.target.value})}
-                      className="text-sm font-medium bg-transparent border-none outline-none cursor-pointer"
+                      className={`text-sm font-medium bg-transparent border-none outline-none cursor-pointer transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                      }`}
                     >
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -537,41 +607,57 @@ const App = () => {
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Age</span>
+                    <span className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Age</span>
                     <input
                       type="number"
                       value={profile.age}
                       onChange={(e) => setProfile({...profile, age: parseInt(e.target.value)})}
-                      className="w-16 text-sm font-medium text-right bg-transparent border-none outline-none"
+                      className={`w-16 text-sm font-medium text-right bg-transparent border-none outline-none transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                      }`}
                     />
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Height (cm)</span>
+                    <span className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Height (cm)</span>
                     <input
                       type="number"
                       value={profile.height}
                       onChange={(e) => setProfile({...profile, height: parseInt(e.target.value)})}
-                      className="w-16 text-sm font-medium text-right bg-transparent border-none outline-none"
+                      className={`w-16 text-sm font-medium text-right bg-transparent border-none outline-none transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                      }`}
                     />
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Weight (kg)</span>
+                    <span className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Weight (kg)</span>
                     <input
                       type="number"
                       value={profile.weight}
                       onChange={(e) => setProfile({...profile, weight: parseInt(e.target.value)})}
-                      className="w-16 text-sm font-medium text-right bg-transparent border-none outline-none"
+                      className={`w-16 text-sm font-medium text-right bg-transparent border-none outline-none transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                      }`}
                     />
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Activity Level</span>
+                    <span className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Activity Level</span>
                     <select 
                       value={profile.activityLevel}
                       onChange={(e) => setProfile({...profile, activityLevel: e.target.value})}
-                      className="text-sm font-medium bg-transparent border-none outline-none cursor-pointer"
+                      className={`text-sm font-medium bg-transparent border-none outline-none cursor-pointer transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                      }`}
                     >
                       <option value="Sedentary">Sedentary</option>
                       <option value="Light">Light</option>
@@ -582,43 +668,73 @@ const App = () => {
                   </div>
                 </div>
                 
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className={`mt-4 pt-4 border-t transition-colors duration-300 ${
+                  isDarkMode ? 'border-gray-700' : 'border-gray-100'
+                }`}>
                   <div className="text-center">
-                    <p className="text-sm text-gray-500">Estimated TDEE</p>
+                    <p className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>Estimated TDEE</p>
                     <p className="text-2xl font-bold text-blue-600">{calculatedTDEE} kcal</p>
-                    <p className="text-xs text-gray-400">BMR {Math.round(calculatedTDEE / (profile.activityLevel === 'Moderate' ? 1.55 : 1.2))} × Activity</p>
+                    <p className={`text-xs transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                    }`}>BMR {Math.round(calculatedTDEE / (profile.activityLevel === 'Moderate' ? 1.55 : 1.2))} × Activity</p>
                   </div>
                 </div>
               </div>
               
               {/* Current Metrics */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center gap-2 mb-4">
                   <Activity className="w-5 h-5 text-green-600" />
-                  <h3 className="font-semibold">Weight</h3>
+                  <h3 className={`font-semibold transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                  }`}>Weight</h3>
                 </div>
                 <p className="text-xs text-green-600 mb-2">Δ -{exerciseImpact.weeklyWeightLoss.toFixed(1)} kg</p>
-                <p className="text-3xl font-bold">{profile.weight.toFixed(1)} kg</p>
-                <p className="text-sm text-gray-500">in 120d</p>
+                <p className={`text-3xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>{profile.weight.toFixed(1)} kg</p>
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>in 120d</p>
               </div>
               
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center gap-2 mb-4">
                   <DollarSign className="w-5 h-5 text-yellow-600" />
-                  <h3 className="font-semibold">Savings</h3>
+                  <h3 className={`font-semibold transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                  }`}>Savings</h3>
                 </div>
                 <p className="text-xs text-green-600 mb-2">in 120d</p>
-                <p className="text-3xl font-bold">₹{((income - expenses) * 4).toLocaleString()}</p>
+                <p className={`text-3xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>₹{((income - expenses) * 4).toLocaleString()}</p>
               </div>
               
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center gap-2 mb-4">
                   <Sun className="w-5 h-5 text-orange-600" />
-                  <h3 className="font-semibold">Happiness</h3>
+                  <h3 className={`font-semibold transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                  }`}>Happiness</h3>
                 </div>
-                <p className="text-sm text-gray-500">/100</p>
-                <p className="text-3xl font-bold">{Math.round(overallHappiness)}</p>
-                <div className="w-full bg-gray-200 rounded-full h-1 mt-2">
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>/100</p>
+                <p className={`text-3xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>{Math.round(overallHappiness)}</p>
+                <div className={`w-full rounded-full h-1 mt-2 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                }`}>
                   <div 
                     className="bg-orange-500 h-1 rounded-full transition-all duration-500"
                     style={{ width: `${overallHappiness}%` }}
@@ -629,30 +745,42 @@ const App = () => {
             
             {/* Main Scores */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h2 className="text-lg font-semibold mb-4 text-gray-700">Overall Scores</h2>
+              <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+              }`}>
+                <h2 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                }`}>Overall Scores</h2>
                 <div className="flex justify-around">
-                  <ProgressRing score={overallHealth} label="Health" color="#10b981" icon={Heart} />
-                  <ProgressRing score={overallProductivity} label="Productivity" color="#3b82f6" icon={Brain} />
-                  <ProgressRing score={overallHappiness} label="Happiness" color="#f59e0b" icon={Sun} />
+                  <ProgressRing score={overallHealth} label="Health" color="#10b981" icon={Heart} isDarkMode={isDarkMode} />
+                  <ProgressRing score={overallProductivity} label="Productivity" color="#3b82f6" icon={Brain} isDarkMode={isDarkMode} />
+                  <ProgressRing score={overallHappiness} label="Happiness" color="#f59e0b" icon={Sun} isDarkMode={isDarkMode} />
                 </div>
               </div>
               
               {/* Trajectory Section */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-5 h-5 text-gray-600" />
-                  <h2 className="text-lg font-semibold text-gray-700">Trajectory</h2>
+                  <TrendingUp className={`w-5 h-5 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`} />
+                  <h2 className={`text-lg font-semibold transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Trajectory</h2>
                 </div>
-                <p className="text-xs text-gray-500 mb-4">How your body, mind, and money evolve over time.</p>
+                <p className={`text-xs mb-4 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>How your body, mind, and money evolve over time.</p>
                 
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={projectionData.slice(0, 5)}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId="weight" orientation="left" domain={[60, 80]} tick={{ fontSize: 10 }} />
-                    <YAxis yAxisId="score" orientation="right" domain={[0, 100]} tick={{ fontSize: 10 }} />
-                    <Tooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#f0f0f0'} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                    <YAxis yAxisId="weight" orientation="left" domain={[60, 80]} tick={{ fontSize: 10, fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                    <YAxis yAxisId="score" orientation="right" domain={[0, 100]} tick={{ fontSize: 10, fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                    <Tooltip content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} />} />
                     <Line 
                       yAxisId="weight"
                       type="monotone" 
@@ -691,36 +819,50 @@ const App = () => {
                 {/* Savings Bar Chart */}
                 <ResponsiveContainer width="100%" height={120} className="mt-4">
                   <BarChart data={projectionData.slice(0, 5)}>
-                    <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                    <YAxis tick={{ fontSize: 10, fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                    <Tooltip content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} />} />
                     <Bar dataKey="income" fill="#1f2937" name="Savings (₹)" radius={[2, 2, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
               
-              <StreakTracker streak={streak} lastActive={lastActive} />
+              <StreakTracker streak={streak} lastActive={lastActive} isDarkMode={isDarkMode} />
             </div>
             
             {/* Simulation Window */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+            }`}>
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-5 h-5 text-gray-600" />
-                <h2 className="text-lg font-semibold text-gray-700">Simulation Window</h2>
+                <Calendar className={`w-5 h-5 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`} />
+                <h2 className={`text-lg font-semibold transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                }`}>Simulation Window</h2>
               </div>
-              <p className="text-xs text-gray-500 mb-4">How many days to project forward?</p>
+              <p className={`text-xs mb-4 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>How many days to project forward?</p>
               
               <div className="flex items-center gap-4">
-                <span className="text-sm font-medium">{simulationDays} days</span>
+                <span className={`text-sm font-medium transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-900'
+                }`}>{simulationDays} days</span>
                 <input
                   type="range"
                   min="30"
                   max="120"
                   value={simulationDays}
                   onChange={(e) => setSimulationDays(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  className={`flex-1 h-2 rounded-lg appearance-none cursor-pointer transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`}
                 />
-                <span className="text-sm text-gray-500">Max 120</span>
+                <span className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>Max 120</span>
               </div>
             </div>
             
@@ -733,6 +875,7 @@ const App = () => {
                 icon={Activity}
                 color="#10b981"
                 trend={exerciseMinutes > 30 ? 12 : -5}
+                isDarkMode={isDarkMode}
               />
               <MetricCard
                 title="Energy Level"
@@ -741,6 +884,7 @@ const App = () => {
                 icon={Zap}
                 color="#f59e0b"
                 trend={8}
+                isDarkMode={isDarkMode}
               />
               <MetricCard
                 title="Focus Power"
@@ -749,6 +893,7 @@ const App = () => {
                 icon={Brain}
                 color="#3b82f6"
                 trend={deepWorkHours > 2 ? 15 : 0}
+                isDarkMode={isDarkMode}
               />
               <MetricCard
                 title="Income Potential"
@@ -757,39 +902,62 @@ const App = () => {
                 icon={TrendingUp}
                 color="#8b5cf6"
                 trend={deepWorkHours > 3 ? 20 : 5}
+                isDarkMode={isDarkMode}
               />
             </div>
             
             {/* Smart Suggestions */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+            }`}>
               <div className="flex items-center gap-2 mb-4">
                 <Lightbulb className="w-5 h-5 text-yellow-600" />
-                <h2 className="text-lg font-semibold text-gray-700">Smart Suggestions</h2>
+                <h2 className={`text-lg font-semibold transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                }`}>Smart Suggestions</h2>
               </div>
-              <p className="text-xs text-gray-500 mb-4">Quick, high-impact tweaks based on your inputs.</p>
+              <p className={`text-xs mb-4 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>Quick, high-impact tweaks based on your inputs.</p>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
+              <div className={`border rounded-lg p-4 transition-colors duration-300 ${
+                isDarkMode 
+                  ? 'bg-blue-900/20 border-blue-800 text-blue-300' 
+                  : 'bg-blue-50 border-blue-200 text-blue-800'
+              }`}>
+                <p className="text-sm">
                   Looking good! Try extending the window or experimenting with presets.
                 </p>
               </div>
             </div>
             
             {/* What Drives Each Metric */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+            }`}>
               <div className="flex items-center gap-2 mb-4">
-                <Eye className="w-5 h-5 text-gray-600" />
-                <h2 className="text-lg font-semibold text-gray-700">What Drives Each Metric?</h2>
+                <Eye className={`w-5 h-5 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`} />
+                <h2 className={`text-lg font-semibold transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                }`}>What Drives Each Metric?</h2>
               </div>
-              <p className="text-xs text-gray-500 mb-4">Understand the model so you can exploit it.</p>
+              <p className={`text-xs mb-4 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>Understand the model so you can exploit it.</p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Activity className="w-5 h-5 text-green-600" />
-                    <h3 className="font-semibold text-gray-700">Weight</h3>
+                    <h3 className={`font-semibold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                    }`}>Weight</h3>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className={`text-sm transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
                     Weight shifts with your daily calorie balance vs TDEE. Auto-calories set a modest 300 kcal deficit.
                   </p>
                 </div>
@@ -797,9 +965,13 @@ const App = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Sun className="w-5 h-5 text-orange-600" />
-                    <h3 className="font-semibold text-gray-700">Happiness</h3>
+                    <h3 className={`font-semibold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                    }`}>Happiness</h3>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className={`text-sm transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
                     Optimized by ~7-8h sleep, some daily movement, 0-3h social time, and keeping leisure screen time in check.
                   </p>
                 </div>
@@ -807,40 +979,58 @@ const App = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Brain className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-semibold text-gray-700">Productivity</h3>
+                    <h3 className={`font-semibold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                    }`}>Productivity</h3>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className={`text-sm transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
                     More deep work, fewer meetings, strong sleep. Batch shallow tasks and protect focus blocks.
                   </p>
                 </div>
               </div>
               
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-600 italic">
+              <div className={`mt-6 p-4 rounded-lg transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+              }`}>
+                <p className={`text-xs italic transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
                   This is an educational sandbox with simplified heuristics — not medical or financial advice.
                 </p>
               </div>
             </div>
             
             {/* Insights */}
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl p-6 text-white">
+            <div className={`rounded-2xl p-6 text-white transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-gradient-to-r from-blue-600 to-purple-700' 
+                : 'bg-gradient-to-r from-blue-500 to-purple-500'
+            }`}>
               <h2 className="text-xl font-bold mb-4">Today's Insights</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/20 backdrop-blur rounded-lg p-4">
+                <div className={`backdrop-blur rounded-lg p-4 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-white/10' : 'bg-white/20'
+                }`}>
                   <Award className="w-8 h-8 mb-2" />
                   <h3 className="font-semibold mb-1">Top Performer</h3>
                   <p className="text-sm opacity-90">
                     Your {radarData.reduce((max, item) => item.value > max.value ? item : max).category} score is excellent at {Math.round(radarData.reduce((max, item) => item.value > max.value ? item : max).value)}%
                   </p>
                 </div>
-                <div className="bg-white/20 backdrop-blur rounded-lg p-4">
+                <div className={`backdrop-blur rounded-lg p-4 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-white/10' : 'bg-white/20'
+                }`}>
                   <Target className="w-8 h-8 mb-2" />
                   <h3 className="font-semibold mb-1">Focus Area</h3>
                   <p className="text-sm opacity-90">
                     Improving {radarData.reduce((min, item) => item.value < min.value ? item : min).category} by 20% could boost overall health by 8%
                   </p>
                 </div>
-                <div className="bg-white/20 backdrop-blur rounded-lg p-4">
+                <div className={`backdrop-blur rounded-lg p-4 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-white/10' : 'bg-white/20'
+                }`}>
                   <Calendar className="w-8 h-8 mb-2" />
                   <h3 className="font-semibold mb-1">30-Day Projection</h3>
                   <p className="text-sm opacity-90">
@@ -855,12 +1045,20 @@ const App = () => {
         {/* Inputs Tab */}
         {activeTab === 'inputs' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+            }`}>
               <div className="flex items-center gap-2 mb-6">
-                <Settings className="w-6 h-6 text-gray-600" />
-                <h2 className="text-xl font-bold text-gray-800">Daily Inputs</h2>
+                <Settings className={`w-6 h-6 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`} />
+                <h2 className={`text-xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-800'
+                }`}>Daily Inputs</h2>
               </div>
-              <p className="text-sm text-gray-600 mb-6">Adjust lifestyle dials and see the ripple effects.</p>
+              <p className={`text-sm mb-6 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>Adjust lifestyle dials and see the ripple effects.</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputSlider
@@ -873,6 +1071,7 @@ const App = () => {
                   icon={Moon}
                   color="#8b5cf6"
                   unit="h"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Sleep Quality"
@@ -882,6 +1081,7 @@ const App = () => {
                   max={10}
                   icon={Moon}
                   color="#8b5cf6"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Exercise Duration"
@@ -893,6 +1093,7 @@ const App = () => {
                   icon={Activity}
                   color="#10b981"
                   unit="min"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Exercise Intensity"
@@ -902,6 +1103,7 @@ const App = () => {
                   max={10}
                   icon={Activity}
                   color="#10b981"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Deep Work Hours"
@@ -913,6 +1115,7 @@ const App = () => {
                   icon={Brain}
                   color="#3b82f6"
                   unit="h"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Focus Quality"
@@ -922,6 +1125,7 @@ const App = () => {
                   max={10}
                   icon={Brain}
                   color="#3b82f6"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Nutrition Quality"
@@ -931,6 +1135,7 @@ const App = () => {
                   max={10}
                   icon={Coffee}
                   color="#f59e0b"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Water Intake"
@@ -941,6 +1146,7 @@ const App = () => {
                   icon={Coffee}
                   color="#06b6d4"
                   unit=" cups"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Social Time"
@@ -952,6 +1158,7 @@ const App = () => {
                   icon={Users}
                   color="#ec4899"
                   unit="h"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Social Quality"
@@ -961,6 +1168,7 @@ const App = () => {
                   max={10}
                   icon={Users}
                   color="#ec4899"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Steps"
@@ -971,6 +1179,7 @@ const App = () => {
                   step={500}
                   icon={Footprints}
                   color="#8b5cf6"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Screen Time"
@@ -982,6 +1191,7 @@ const App = () => {
                   icon={Smartphone}
                   color="#ef4444"
                   unit="h"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Social Time"
@@ -993,6 +1203,7 @@ const App = () => {
                   icon={Users}
                   color="#ec4899"
                   unit="h"
+                  isDarkMode={isDarkMode}
                 />
                 <InputSlider
                   label="Protein"
@@ -1004,15 +1215,22 @@ const App = () => {
                   icon={Utensils}
                   color="#10b981"
                   unit="g"
+                  isDarkMode={isDarkMode}
                 />
               </div>
               
               {/* Calories Section */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className={`mt-6 p-4 rounded-lg transition-colors duration-300 ${
+                isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+              }`}>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-gray-700">Calories</label>
+                  <label className={`text-sm font-medium transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Calories</label>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Auto (TDEE - 300)</span>
+                    <span className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Auto (TDEE - 300)</span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -1020,11 +1238,15 @@ const App = () => {
                         onChange={(e) => setAutoCalories(e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className={`w-11 h-6 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 transition-colors duration-300 ${
+                        isDarkMode ? 'bg-gray-600 after:border-gray-500' : 'bg-gray-200 after:border-gray-300'
+                      }`}></div>
                     </label>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-center">
+                <div className={`text-2xl font-bold text-center transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
                   {effectiveCalories} kcal/day
                 </div>
                 {!autoCalories && (
@@ -1035,45 +1257,67 @@ const App = () => {
                     step="50"
                     value={calories}
                     onChange={(e) => setCalories(parseInt(e.target.value))}
-                    className="w-full mt-3 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    className={`w-full mt-3 h-2 rounded-lg appearance-none cursor-pointer transition-colors duration-300 ${
+                      isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
+                    }`}
                   />
                 )}
               </div>
             </div>
             
             {/* Finances Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+            }`}>
               <div className="flex items-center gap-2 mb-6">
                 <DollarSign className="w-6 h-6 text-green-600" />
-                <h2 className="text-xl font-bold text-gray-800">Finances</h2>
+                <h2 className={`text-xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-200' : 'text-gray-800'
+                }`}>Finances</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Income (₹/mo)</label>
+                  <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>Income (₹/mo)</label>
                   <input
                     type="number"
                     value={income}
                     onChange={(e) => setIncome(parseInt(e.target.value))}
-                    className="w-full p-3 border border-gray-300 rounded-lg text-right font-bold text-lg"
+                    className={`w-full p-3 border rounded-lg text-right font-bold text-lg transition-colors duration-300 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white' 
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Expenses (₹/mo)</label>
+                  <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>Expenses (₹/mo)</label>
                   <input
                     type="number"
                     value={expenses}
                     onChange={(e) => setExpenses(parseInt(e.target.value))}
-                    className="w-full p-3 border border-gray-300 rounded-lg text-right font-bold text-lg"
+                    className={`w-full p-3 border rounded-lg text-right font-bold text-lg transition-colors duration-300 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white' 
+                        : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                   />
                 </div>
               </div>
               
               <div className="mt-6">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Savings Rate</span>
-                  <span className="font-bold">{savingsRate}%</span>
+                  <span className={`text-sm transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>Savings Rate</span>
+                  <span className={`font-bold transition-colors duration-300 ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>{savingsRate}%</span>
                 </div>
                 <input
                   type="range"
@@ -1081,7 +1325,9 @@ const App = () => {
                   max="50"
                   value={savingsRate}
                   onChange={(e) => setSavingsRate(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  className={`w-full h-2 rounded-lg appearance-none cursor-pointer transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`}
                 />
                 <div className="mt-2 text-center">
                   <span className="text-lg font-bold text-green-600">
@@ -1092,7 +1338,11 @@ const App = () => {
             </div>
             
             {/* Real-time Impact Display */}
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-6 text-white">
+            <div className={`rounded-2xl p-6 text-white transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-gradient-to-r from-green-600 to-emerald-700' 
+                : 'bg-gradient-to-r from-green-500 to-emerald-500'
+            }`}>
               <h3 className="text-lg font-bold mb-4">Real-time Impact Analysis</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -1119,13 +1369,19 @@ const App = () => {
         {/* Projections Tab */}
         {activeTab === 'projections' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-bold mb-6 text-gray-800">Your Future Trajectory</h2>
+            <div className={`rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+            }`}>
+              <h2 className={`text-xl font-bold mb-6 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-200' : 'text-gray-800'
+              }`}>Your Future Trajectory</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Weight Projection */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4 text-gray-700">Weight Loss Journey</h3>
+                  <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Weight Loss Journey</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <AreaChart data={projectionData}>
                       <defs>
@@ -1134,10 +1390,10 @@ const App = () => {
                           <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis domain={['dataMin - 5', 'dataMax + 5']} />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#f0f0f0'} />
+                      <XAxis dataKey="month" tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <Tooltip content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} />} />
                       <Area type="monotone" dataKey="weight" stroke="#10b981" fillOpacity={1} fill="url(#weightGradient)" />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -1145,13 +1401,15 @@ const App = () => {
                 
                 {/* Health Score Projection */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4 text-gray-700">Health Score Evolution</h3>
+                  <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Health Score Evolution</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={projectionData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis domain={[0, 100]} />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#f0f0f0'} />
+                      <XAxis dataKey="month" tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <YAxis domain={[0, 100]} tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <Tooltip content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} />} />
                       <Line type="monotone" dataKey="health" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -1159,13 +1417,15 @@ const App = () => {
                 
                 {/* Income Growth */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4 text-gray-700">Income Growth Potential</h3>
+                  <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Income Growth Potential</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={projectionData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#f0f0f0'} />
+                      <XAxis dataKey="month" tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <YAxis tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <Tooltip content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} />} />
                       <Bar dataKey="income" fill="#f59e0b" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -1173,7 +1433,9 @@ const App = () => {
                 
                 {/* Happiness Trend */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4 text-gray-700">Happiness Trajectory</h3>
+                  <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>Happiness Trajectory</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <AreaChart data={projectionData}>
                       <defs>
@@ -1182,10 +1444,10 @@ const App = () => {
                           <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis domain={[0, 100]} />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#f0f0f0'} />
+                      <XAxis dataKey="month" tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <YAxis domain={[0, 100]} tick={{ fill: isDarkMode ? '#9CA3AF' : '#374151' }} />
+                      <Tooltip content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} />} />
                       <Area type="monotone" dataKey="happiness" stroke="#ec4899" fillOpacity={1} fill="url(#happinessGradient)" />
                     </AreaChart>
                   </ResponsiveContainer>

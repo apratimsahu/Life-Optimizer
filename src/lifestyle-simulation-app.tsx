@@ -1,9 +1,41 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Moon, Sun, Activity, Brain, Heart, TrendingUp, Award, Zap, Coffee, Users, Target, Calendar, AlertCircle, CheckCircle, Flame } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { Moon, Sun, Activity, Brain, Heart, TrendingUp, Award, Zap, Coffee, Users, Target, Calendar, AlertCircle, CheckCircle, Flame, User, DollarSign, Settings, Eye, Footprints, Smartphone, Utensils, Lightbulb } from 'lucide-react';
+
+// ============ TYPES ============
+interface Profile {
+  sex: string;
+  age: number;
+  height: number;
+  weight: number;
+  activityLevel: string;
+}
 
 // ============ CALCULATION ENGINES ============
-const calculateSleepImpact = (hours, quality) => {
+const calculateTDEE = (profile: Profile, activityLevel: string): number => {
+  const { sex, age, height, weight } = profile;
+  
+  // Mifflin-St Jeor Equation
+  let bmr;
+  if (sex === 'Male') {
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  } else {
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+  }
+  
+  // Activity multipliers
+  const activityMultipliers: Record<string, number> = {
+    'Sedentary': 1.2,
+    'Light': 1.375,
+    'Moderate': 1.55,
+    'Active': 1.725,
+    'Very Active': 1.9
+  };
+  
+  return Math.round(bmr * (activityMultipliers[activityLevel] || 1.55));
+};
+
+const calculateSleepImpact = (hours: number, quality: number) => {
   const optimalHours = 7.5;
   const sleepScore = Math.max(0, 100 - Math.abs(hours - optimalHours) * 15);
   const qualityMultiplier = quality / 10;
@@ -16,7 +48,7 @@ const calculateSleepImpact = (hours, quality) => {
   };
 };
 
-const calculateExerciseImpact = (minutes, intensity) => {
+const calculateExerciseImpact = (minutes: number, intensity: number) => {
   const weeklyMinutes = minutes * 7;
   const intensityMultiplier = intensity / 10;
   
@@ -29,7 +61,7 @@ const calculateExerciseImpact = (minutes, intensity) => {
   };
 };
 
-const calculateDeepWorkImpact = (hours, focusQuality) => {
+const calculateDeepWorkImpact = (hours: number, focusQuality: number) => {
   const optimalDuration = hours >= 2 && hours <= 4;
   const focusMultiplier = focusQuality / 10;
   
@@ -42,7 +74,7 @@ const calculateDeepWorkImpact = (hours, focusQuality) => {
   };
 };
 
-const calculateNutritionImpact = (quality, hydration) => {
+const calculateNutritionImpact = (quality: number, hydration: number) => {
   return {
     healthScore: (quality / 10) * 80 + (hydration / 8) * 20,
     energyLevel: quality > 7 ? 1.2 : 1.0,
@@ -52,7 +84,7 @@ const calculateNutritionImpact = (quality, hydration) => {
   };
 };
 
-const calculateSocialImpact = (hours, quality) => {
+const calculateSocialImpact = (hours: number, quality: number) => {
   const qualityMultiplier = quality / 10;
   
   return {
@@ -65,7 +97,15 @@ const calculateSocialImpact = (hours, quality) => {
 };
 
 // ============ COMPONENTS ============
-const ProgressRing = ({ score, label, color, icon: Icon, size = 120 }) => {
+interface ProgressRingProps {
+  score: number;
+  label: string;
+  color: string;
+  icon?: any;
+  size?: number;
+}
+
+const ProgressRing = ({ score, label, color, icon: Icon, size = 120 }: ProgressRingProps) => {
   const radius = (size - 16) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
@@ -104,7 +144,19 @@ const ProgressRing = ({ score, label, color, icon: Icon, size = 120 }) => {
   );
 };
 
-const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, color, unit = '' }) => {
+interface InputSliderProps {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+  icon?: any;
+  color: string;
+  unit?: string;
+}
+
+const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, color, unit = '' }: InputSliderProps) => {
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-2">
@@ -136,7 +188,16 @@ const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, c
   );
 };
 
-const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend }) => {
+interface MetricCardProps {
+  title: string;
+  value: string;
+  subtitle?: string;
+  icon: any;
+  color: string;
+  trend?: number;
+}
+
+const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend }: MetricCardProps) => {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
       <div className="flex items-start justify-between mb-4">
@@ -156,7 +217,12 @@ const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend }) => {
   );
 };
 
-const StreakTracker = ({ streak, lastActive }) => {
+interface StreakTrackerProps {
+  streak: number;
+  lastActive: string;
+}
+
+const StreakTracker = ({ streak, lastActive }: StreakTrackerProps) => {
   const isActiveToday = lastActive === new Date().toDateString();
   
   return (
@@ -189,6 +255,15 @@ const StreakTracker = ({ streak, lastActive }) => {
 
 // ============ MAIN APP ============
 const App = () => {
+  // Profile states
+  const [profile, setProfile] = useState<Profile>({
+    sex: 'Male',
+    age: 28,
+    height: 175, // cm
+    weight: 75, // kg
+    activityLevel: 'Moderate'
+  });
+  
   // Input states
   const [sleepHours, setSleepHours] = useState(7.5);
   const [sleepQuality, setSleepQuality] = useState(7);
@@ -200,11 +275,34 @@ const App = () => {
   const [hydration, setHydration] = useState(6);
   const [socialHours, setSocialHours] = useState(2);
   const [socialQuality, setSocialQuality] = useState(7);
+  const [steps, setSteps] = useState(9000);
+  const [screenTime, setScreenTime] = useState(2.5);
+  const [protein, setProtein] = useState(120);
+  const [calories, setCalories] = useState(2349);
+  const [autoCalories, setAutoCalories] = useState(true);
+  
+  // Financial states
+  const [income, setIncome] = useState(150000);
+  const [expenses, setExpenses] = useState(90000);
+  const [savingsRate, setSavingsRate] = useState(20);
+  
+  // Simulation states
+  const [simulationDays, setSimulationDays] = useState(120);
+  const [presetMode, setPresetMode] = useState('Balanced');
   
   // UI states
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [streak, setStreak] = useState(7);
-  const [lastActive, setLastActive] = useState(new Date().toDateString());
+  const [streak] = useState(7);
+  const [lastActive] = useState(new Date().toDateString());
+  
+  // Calculate TDEE and auto calories
+  const calculatedTDEE = useMemo(() => calculateTDEE(profile, profile.activityLevel), [profile]);
+  const effectiveCalories = useMemo(() => {
+    if (autoCalories) {
+      return calculatedTDEE - 300; // 300 calorie deficit for weight loss
+    }
+    return calories;
+  }, [autoCalories, calculatedTDEE, calories]);
   
   // Calculate impacts
   const sleepImpact = useMemo(() => calculateSleepImpact(sleepHours, sleepQuality), [sleepHours, sleepQuality]);
@@ -260,6 +358,58 @@ const App = () => {
   }, [exerciseImpact, overallHealth, overallProductivity, deepWorkImpact, overallHappiness, socialImpact]);
   
   // Radar chart data
+  // Preset modes handler
+  const applyPreset = (mode: string) => {
+    setPresetMode(mode);
+    switch (mode) {
+      case 'Balanced':
+        setSleepHours(7.5);
+        setSleepQuality(7);
+        setExerciseMinutes(30);
+        setExerciseIntensity(6);
+        setDeepWorkHours(3);
+        setFocusQuality(7);
+        setNutritionQuality(7);
+        setHydration(6);
+        setSocialHours(2);
+        setSocialQuality(7);
+        setSteps(9000);
+        setScreenTime(2.5);
+        setProtein(120);
+        break;
+      case 'Hard Charger':
+        setSleepHours(6.5);
+        setSleepQuality(8);
+        setExerciseMinutes(60);
+        setExerciseIntensity(8);
+        setDeepWorkHours(5);
+        setFocusQuality(9);
+        setNutritionQuality(9);
+        setHydration(8);
+        setSocialHours(1.5);
+        setSocialQuality(8);
+        setSteps(12000);
+        setScreenTime(1.5);
+        setProtein(150);
+        break;
+      case 'Gentle Reset':
+        setSleepHours(8.5);
+        setSleepQuality(6);
+        setExerciseMinutes(20);
+        setExerciseIntensity(4);
+        setDeepWorkHours(2);
+        setFocusQuality(6);
+        setNutritionQuality(6);
+        setHydration(5);
+        setSocialHours(3);
+        setSocialQuality(6);
+        setSteps(6000);
+        setScreenTime(3.5);
+        setProtein(100);
+        break;
+    }
+  };
+  
   const radarData = useMemo(() => [
     {
       category: 'Sleep',
@@ -305,7 +455,25 @@ const App = () => {
                 <p className="text-xs text-gray-600">Transform your daily habits into life-changing results</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              {/* Preset Mode Buttons */}
+              <div className="hidden md:flex gap-1 mr-4">
+                {['Balanced', 'Hard Charger', 'Gentle Reset'].map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => applyPreset(mode)}
+                    className={`px-3 py-1 text-sm rounded-md font-medium transition-all ${
+                      presetMode === mode
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Tab Buttons */}
               <button
                 onClick={() => setActiveTab('dashboard')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
@@ -345,6 +513,120 @@ const App = () => {
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
+            {/* Profile and Current Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {/* Your Profile */}
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <User className="w-5 h-5 text-gray-600" />
+                  <h2 className="text-lg font-semibold text-gray-700">Your Profile</h2>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">Personalize your baseline to improve accuracy.</p>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Sex</span>
+                    <select 
+                      value={profile.sex}
+                      onChange={(e) => setProfile({...profile, sex: e.target.value})}
+                      className="text-sm font-medium bg-transparent border-none outline-none cursor-pointer"
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Age</span>
+                    <input
+                      type="number"
+                      value={profile.age}
+                      onChange={(e) => setProfile({...profile, age: parseInt(e.target.value)})}
+                      className="w-16 text-sm font-medium text-right bg-transparent border-none outline-none"
+                    />
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Height (cm)</span>
+                    <input
+                      type="number"
+                      value={profile.height}
+                      onChange={(e) => setProfile({...profile, height: parseInt(e.target.value)})}
+                      className="w-16 text-sm font-medium text-right bg-transparent border-none outline-none"
+                    />
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Weight (kg)</span>
+                    <input
+                      type="number"
+                      value={profile.weight}
+                      onChange={(e) => setProfile({...profile, weight: parseInt(e.target.value)})}
+                      className="w-16 text-sm font-medium text-right bg-transparent border-none outline-none"
+                    />
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Activity Level</span>
+                    <select 
+                      value={profile.activityLevel}
+                      onChange={(e) => setProfile({...profile, activityLevel: e.target.value})}
+                      className="text-sm font-medium bg-transparent border-none outline-none cursor-pointer"
+                    >
+                      <option value="Sedentary">Sedentary</option>
+                      <option value="Light">Light</option>
+                      <option value="Moderate">Moderate</option>
+                      <option value="Active">Active</option>
+                      <option value="Very Active">Very Active</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Estimated TDEE</p>
+                    <p className="text-2xl font-bold text-blue-600">{calculatedTDEE} kcal</p>
+                    <p className="text-xs text-gray-400">BMR {Math.round(calculatedTDEE / (profile.activityLevel === 'Moderate' ? 1.55 : 1.2))} × Activity</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Current Metrics */}
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <Activity className="w-5 h-5 text-green-600" />
+                  <h3 className="font-semibold">Weight</h3>
+                </div>
+                <p className="text-xs text-green-600 mb-2">Δ -{exerciseImpact.weeklyWeightLoss.toFixed(1)} kg</p>
+                <p className="text-3xl font-bold">{profile.weight.toFixed(1)} kg</p>
+                <p className="text-sm text-gray-500">in 120d</p>
+              </div>
+              
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <DollarSign className="w-5 h-5 text-yellow-600" />
+                  <h3 className="font-semibold">Savings</h3>
+                </div>
+                <p className="text-xs text-green-600 mb-2">in 120d</p>
+                <p className="text-3xl font-bold">₹{((income - expenses) * 4).toLocaleString()}</p>
+              </div>
+              
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sun className="w-5 h-5 text-orange-600" />
+                  <h3 className="font-semibold">Happiness</h3>
+                </div>
+                <p className="text-sm text-gray-500">/100</p>
+                <p className="text-3xl font-bold">{Math.round(overallHappiness)}</p>
+                <div className="w-full bg-gray-200 rounded-full h-1 mt-2">
+                  <div 
+                    className="bg-orange-500 h-1 rounded-full transition-all duration-500"
+                    style={{ width: `${overallHappiness}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+            
             {/* Main Scores */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-2xl p-6 shadow-lg">
@@ -356,19 +638,90 @@ const App = () => {
                 </div>
               </div>
               
+              {/* Trajectory Section */}
               <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h2 className="text-lg font-semibold mb-4 text-gray-700">Lifestyle Balance</h2>
-                <ResponsiveContainer width="100%" height={200}>
-                  <RadarChart data={radarData}>
-                    <PolarGrid strokeDasharray="3 3" />
-                    <PolarAngleAxis dataKey="category" tick={{ fontSize: 12 }} />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
-                    <Radar name="Balance" dataKey="value" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} />
-                  </RadarChart>
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-5 h-5 text-gray-600" />
+                  <h2 className="text-lg font-semibold text-gray-700">Trajectory</h2>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">How your body, mind, and money evolve over time.</p>
+                
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={projectionData.slice(0, 5)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                    <YAxis yAxisId="weight" orientation="left" domain={[60, 80]} tick={{ fontSize: 10 }} />
+                    <YAxis yAxisId="score" orientation="right" domain={[0, 100]} tick={{ fontSize: 10 }} />
+                    <Tooltip />
+                    <Line 
+                      yAxisId="weight"
+                      type="monotone" 
+                      dataKey="weight" 
+                      stroke="#10b981" 
+                      strokeWidth={2}
+                      name="Weight (kg)"
+                    />
+                    <Line 
+                      yAxisId="score"
+                      type="monotone" 
+                      dataKey="happiness" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      name="Happiness"
+                    />
+                    <Line 
+                      yAxisId="score"
+                      type="monotone" 
+                      dataKey="health" 
+                      stroke="#8b5cf6" 
+                      strokeWidth={2}
+                      name="Health"
+                    />
+                    <Line 
+                      yAxisId="score"
+                      type="monotone" 
+                      dataKey="productivity" 
+                      stroke="#f59e0b" 
+                      strokeWidth={2}
+                      name="Productivity"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+                
+                {/* Savings Bar Chart */}
+                <ResponsiveContainer width="100%" height={120} className="mt-4">
+                  <BarChart data={projectionData.slice(0, 5)}>
+                    <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip />
+                    <Bar dataKey="income" fill="#1f2937" name="Savings (₹)" radius={[2, 2, 0, 0]} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
               
               <StreakTracker streak={streak} lastActive={lastActive} />
+            </div>
+            
+            {/* Simulation Window */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="w-5 h-5 text-gray-600" />
+                <h2 className="text-lg font-semibold text-gray-700">Simulation Window</h2>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">How many days to project forward?</p>
+              
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium">{simulationDays} days</span>
+                <input
+                  type="range"
+                  min="30"
+                  max="120"
+                  value={simulationDays}
+                  onChange={(e) => setSimulationDays(parseInt(e.target.value))}
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <span className="text-sm text-gray-500">Max 120</span>
+              </div>
             </div>
             
             {/* Key Metrics */}
@@ -407,6 +760,68 @@ const App = () => {
               />
             </div>
             
+            {/* Smart Suggestions */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Lightbulb className="w-5 h-5 text-yellow-600" />
+                <h2 className="text-lg font-semibold text-gray-700">Smart Suggestions</h2>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">Quick, high-impact tweaks based on your inputs.</p>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-800">
+                  Looking good! Try extending the window or experimenting with presets.
+                </p>
+              </div>
+            </div>
+            
+            {/* What Drives Each Metric */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Eye className="w-5 h-5 text-gray-600" />
+                <h2 className="text-lg font-semibold text-gray-700">What Drives Each Metric?</h2>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">Understand the model so you can exploit it.</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="w-5 h-5 text-green-600" />
+                    <h3 className="font-semibold text-gray-700">Weight</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Weight shifts with your daily calorie balance vs TDEE. Auto-calories set a modest 300 kcal deficit.
+                  </p>
+                </div>
+                
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sun className="w-5 h-5 text-orange-600" />
+                    <h3 className="font-semibold text-gray-700">Happiness</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Optimized by ~7-8h sleep, some daily movement, 0-3h social time, and keeping leisure screen time in check.
+                  </p>
+                </div>
+                
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-semibold text-gray-700">Productivity</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    More deep work, fewer meetings, strong sleep. Batch shallow tasks and protect focus blocks.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600 italic">
+                  This is an educational sandbox with simplified heuristics — not medical or financial advice.
+                </p>
+              </div>
+            </div>
+            
             {/* Insights */}
             <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl p-6 text-white">
               <h2 className="text-xl font-bold mb-4">Today's Insights</h2>
@@ -441,7 +856,11 @@ const App = () => {
         {activeTab === 'inputs' && (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-bold mb-6 text-gray-800">Daily Lifestyle Inputs</h2>
+              <div className="flex items-center gap-2 mb-6">
+                <Settings className="w-6 h-6 text-gray-600" />
+                <h2 className="text-xl font-bold text-gray-800">Daily Inputs</h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-6">Adjust lifestyle dials and see the ripple effects.</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputSlider
@@ -543,6 +962,132 @@ const App = () => {
                   icon={Users}
                   color="#ec4899"
                 />
+                <InputSlider
+                  label="Steps"
+                  value={steps}
+                  onChange={setSteps}
+                  min={3000}
+                  max={15000}
+                  step={500}
+                  icon={Footprints}
+                  color="#8b5cf6"
+                />
+                <InputSlider
+                  label="Screen Time"
+                  value={screenTime}
+                  onChange={setScreenTime}
+                  min={0.5}
+                  max={8}
+                  step={0.5}
+                  icon={Smartphone}
+                  color="#ef4444"
+                  unit="h"
+                />
+                <InputSlider
+                  label="Social Time"
+                  value={socialHours}
+                  onChange={setSocialHours}
+                  min={0}
+                  max={8}
+                  step={0.5}
+                  icon={Users}
+                  color="#ec4899"
+                  unit="h"
+                />
+                <InputSlider
+                  label="Protein"
+                  value={protein}
+                  onChange={setProtein}
+                  min={50}
+                  max={200}
+                  step={5}
+                  icon={Utensils}
+                  color="#10b981"
+                  unit="g"
+                />
+              </div>
+              
+              {/* Calories Section */}
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-gray-700">Calories</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Auto (TDEE - 300)</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={autoCalories}
+                        onChange={(e) => setAutoCalories(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-center">
+                  {effectiveCalories} kcal/day
+                </div>
+                {!autoCalories && (
+                  <input
+                    type="range"
+                    min="1200"
+                    max="4000"
+                    step="50"
+                    value={calories}
+                    onChange={(e) => setCalories(parseInt(e.target.value))}
+                    className="w-full mt-3 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                )}
+              </div>
+            </div>
+            
+            {/* Finances Section */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-6">
+                <DollarSign className="w-6 h-6 text-green-600" />
+                <h2 className="text-xl font-bold text-gray-800">Finances</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Income (₹/mo)</label>
+                  <input
+                    type="number"
+                    value={income}
+                    onChange={(e) => setIncome(parseInt(e.target.value))}
+                    className="w-full p-3 border border-gray-300 rounded-lg text-right font-bold text-lg"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Expenses (₹/mo)</label>
+                  <input
+                    type="number"
+                    value={expenses}
+                    onChange={(e) => setExpenses(parseInt(e.target.value))}
+                    className="w-full p-3 border border-gray-300 rounded-lg text-right font-bold text-lg"
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">Savings Rate</span>
+                  <span className="font-bold">{savingsRate}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="50"
+                  value={savingsRate}
+                  onChange={(e) => setSavingsRate(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="mt-2 text-center">
+                  <span className="text-lg font-bold text-green-600">
+                    ₹{(income - expenses).toLocaleString()}/mo saved
+                  </span>
+                </div>
               </div>
             </div>
             

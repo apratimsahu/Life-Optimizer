@@ -126,7 +126,7 @@ interface ProgressRingProps {
   isDarkMode?: boolean;
 }
 
-const ProgressRing = ({ score, label, color, icon: Icon, size = 120, isDarkMode = false }: ProgressRingProps) => {
+const ProgressRing = ({ score, label, color, icon: Icon, size = 120 }: ProgressRingProps) => {
   const radius = (size - 16) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
@@ -178,7 +178,7 @@ interface InputSliderProps {
   isDarkMode?: boolean;
 }
 
-const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, color, unit = '', isDarkMode = false }: InputSliderProps) => {
+const InputSlider = ({ label, value, onChange, min, max, step = 1, icon: Icon, color, unit = '' }: InputSliderProps) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700">
       <div className="flex items-center justify-between mb-2">
@@ -220,7 +220,7 @@ interface MetricCardProps {
   isDarkMode?: boolean;
 }
 
-const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend, isDarkMode = false }: MetricCardProps) => {
+const MetricCard = ({ title, value, subtitle, icon: Icon, color, trend }: MetricCardProps) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
       <div className="flex items-start justify-between mb-4">
@@ -246,7 +246,7 @@ interface StreakTrackerProps {
   isDarkMode?: boolean;
 }
 
-const StreakTracker = ({ streak, lastActive, isDarkMode = false }: StreakTrackerProps) => {
+const StreakTracker = ({ streak, lastActive }: StreakTrackerProps) => {
   const isActiveToday = lastActive === new Date().toDateString();
   
   return (

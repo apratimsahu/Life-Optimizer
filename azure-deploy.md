@@ -7,13 +7,27 @@
 
 ## Option 1: Azure Static Web Apps (Recommended)
 
-### Step 1: Install Azure CLI
+### Option A: Azure Portal (Easiest)
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Search for "Static Web Apps" and create new
+3. Choose GitHub and authorize
+4. Select repository: `apratimsahu/Life-Optimizer`
+5. Branch: `main`
+6. Build preset: `React`
+7. App location: `/`
+8. Output location: `dist`
+
+Azure will automatically create GitHub Actions workflow and deploy on every push to main.
+
+### Option B: Azure CLI
+
+#### Step 1: Install Azure CLI
 ```bash
 # Install Azure CLI (Windows)
 winget install Microsoft.AzureCLI
 ```
 
-### Step 2: Login and Create Static Web App
+#### Step 2: Login and Create Static Web App
 ```bash
 # Login to Azure
 az login
@@ -25,7 +39,7 @@ az group create --name life-optimizer-rg --location "Central India"
 az staticwebapp create \
   --name life-optimizer-app \
   --resource-group life-optimizer-rg \
-  --source https://github.com/YOUR_USERNAME/YOUR_REPO \
+  --source https://github.com/apratimsahu/Life-Optimizer \
   --location "Central India" \
   --branch main \
   --app-location "/" \

@@ -282,9 +282,9 @@ const App = () => {
   // Profile states
   const [profile, setProfile] = useState<Profile>({
     sex: 'Male',
-    age: 28,
-    height: 175, // cm
-    weight: 75, // kg
+    age: 33,
+    height: 165, // cm
+    weight: 76, // kg
     activityLevel: 'Moderate'
   });
   
